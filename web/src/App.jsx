@@ -8,7 +8,7 @@ function App() {
     <Router>
       <div className="app">
         <header className="header">
-          <div className="container">
+          <div className="header-content">
             <Link to="/" className="logo">
               <h1>Moldova Tariff Nomenclature</h1>
             </Link>

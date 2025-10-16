@@ -1,36 +1,110 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import Fuse from 'fuse.js'
+
+function TreeNode({ node, level = 0, filter }) {
+  const [isOpen, setIsOpen] = useState(level < 2) // Auto-expand first 2 levels
+  const hasChildren = node.children && node.children.length > 0
+
+  const displayName = node.name_ro || node.name_ru || node.name_en || 'Unnamed'
+  const displayCode = node.nc || ''
+
+  // Auto-expand if filter is active and has matching children
+  useEffect(() => {
+    if (filter && hasChildren) {
+      setIsOpen(true)
+    }
+  }, [filter, hasChildren])
+
+  // Check if this node or any child matches filter
+  const matchesFilter = useMemo(() => {
+    if (!filter || !filter.trim()) return true
+
+    const searchLower = filter.toLowerCase().trim()
+    const nodeMatches =
+      displayName.toLowerCase().includes(searchLower) ||
+      displayCode.toLowerCase().includes(searchLower)
+
+    // If this node matches, show it
+    if (nodeMatches) return true
+
+    // Check if any child matches (recursive)
+    const hasMatchingChild = (currentNode) => {
+      if (!currentNode.children || currentNode.children.length === 0) return false
+
+      return currentNode.children.some(child => {
+        const childName = (child.name_ro || child.name_ru || child.name_en || '').toLowerCase()
+        const childCode = (child.nc || '').toLowerCase()
+
+        // Check if this child matches
+        if (childName.includes(searchLower) || childCode.includes(searchLower)) {
+          return true
+        }
+
+        // Recursively check child's children
+        return hasMatchingChild(child)
+      })
+    }
+
+    return hasMatchingChild(node)
+  }, [filter, displayName, displayCode, node])
+
+  if (!matchesFilter) return null
+
+  return (
+    <div className="tree-node">
+      <div
+        className="tree-node-content"
+        style={{ paddingLeft: `${level * 24}px` }}
+      >
+        {hasChildren && (
+          <button
+            className="tree-toggle"
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label={isOpen ? 'Collapse' : 'Expand'}
+          >
+            {isOpen ? '▼' : '▶'}
+          </button>
+        )}
+        {!hasChildren && <span className="tree-spacer"></span>}
+
+        <Link
+          to={`/category/${node.id}`}
+          className="tree-node-link"
+        >
+          {displayCode && <span className="tree-code">{displayCode}</span>}
+          <span className="tree-name">{displayName}</span>
+          {node.import_acts && node.import_acts.length > 0 && (
+            <span className="tree-badge">{node.import_acts.length} acts</span>
+          )}
+        </Link>
+      </div>
+
+      {hasChildren && isOpen && (
+        <div className="tree-children">
+          {node.children.map(child => (
+            <TreeNode
+              key={child.id}
+              node={child}
+              level={level + 1}
+              filter={filter}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 function Home() {
-  const [data, setData] = useState([])
-  const [searchQuery, setSearchQuery] = useState('')
-  const [results, setResults] = useState([])
+  const [treeData, setTreeData] = useState([])
+  const [filter, setFilter] = useState('')
   const [loading, setLoading] = useState(true)
-  const [fuse, setFuse] = useState(null)
 
   useEffect(() => {
-    // Load the data
-    fetch('/data/nomenclature_flat.json')
+    fetch('/data/nomenclature_tree.json')
       .then(res => res.json())
       .then(data => {
-        setData(data)
-
-        // Initialize Fuse.js for fuzzy search
-        const fuseInstance = new Fuse(data, {
-          keys: [
-            { name: 'nc_code', weight: 2 },
-            { name: 'name_ro', weight: 1.5 },
-            { name: 'name_ru', weight: 1.5 },
-            { name: 'name_en', weight: 1 },
-            { name: 'path', weight: 0.5 }
-          ],
-          threshold: 0.4,
-          includeScore: true,
-          minMatchCharLength: 2
-        })
-
-        setFuse(fuseInstance)
+        setTreeData(data)
         setLoading(false)
       })
       .catch(err => {
@@ -39,98 +113,42 @@ function Home() {
       })
   }, [])
 
-  useEffect(() => {
-    if (!fuse || !searchQuery.trim()) {
-      setResults([])
-      return
-    }
-
-    // Perform fuzzy search
-    const searchResults = fuse.search(searchQuery)
-    setResults(searchResults.slice(0, 50)) // Limit to 50 results
-  }, [searchQuery, fuse])
-
-  const handleSearch = (e) => {
-    setSearchQuery(e.target.value)
-  }
-
   if (loading) {
     return (
-      <div className="container">
-        <div className="loading">Loading data...</div>
+      <div className="tree-container">
+        <div className="loading">Loading nomenclature...</div>
       </div>
     )
   }
 
   return (
-    <div className="container">
-      <div className="search-page">
-        <div className="search-header">
-          <h2>Moldova Customs Tariff Database</h2>
-          <p>Search by NC code, name in any language, or keywords</p>
-        </div>
+    <div className="tree-container">
+      <div className="tree-header">
+        <input
+          type="text"
+          placeholder="Filter by NC code or name..."
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          className="tree-filter"
+        />
+        {filter && (
+          <button
+            className="clear-filter"
+            onClick={() => setFilter('')}
+          >
+            Clear
+          </button>
+        )}
+      </div>
 
-        <div className="search-box">
-          <input
-            type="text"
-            placeholder="Enter NC code or search terms..."
-            value={searchQuery}
-            onChange={handleSearch}
-            className="search-input"
-            autoFocus
+      <div className="tree-view">
+        {treeData.map(node => (
+          <TreeNode
+            key={node.id}
+            node={node}
+            filter={filter}
           />
-        </div>
-
-        {searchQuery.trim() && (
-          <div className="search-results">
-            <div className="results-header">
-              <h3>
-                {results.length > 0
-                  ? `Found ${results.length} result${results.length !== 1 ? 's' : ''}`
-                  : 'No results found'
-                }
-              </h3>
-            </div>
-
-            <div className="results-list">
-              {results.map(({ item, score }) => (
-                <Link
-                  key={item.id}
-                  to={`/category/${item.id}`}
-                  className="result-card"
-                >
-                  <div className="result-header">
-                    <span className="nc-code">{item.nc_code}</span>
-                    {item.is_leaf && <span className="badge">Leaf</span>}
-                  </div>
-                  <div className="result-content">
-                    <h4>{item.name_ro || item.name_ru || item.name_en}</h4>
-                    {item.path && (
-                      <p className="result-path">{item.path}</p>
-                    )}
-                  </div>
-                  {item.import_acts && item.import_acts.length > 0 && (
-                    <div className="result-meta">
-                      {item.import_acts.length} regulatory act{item.import_acts.length !== 1 ? 's' : ''}
-                    </div>
-                  )}
-                </Link>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {!searchQuery.trim() && (
-          <div className="search-tips">
-            <h3>Search Tips</h3>
-            <ul>
-              <li>Search by NC code (e.g., "0101")</li>
-              <li>Search by product name in Romanian, Russian, or English</li>
-              <li>Use keywords related to the product category</li>
-              <li>Partial matches and typos are handled automatically</li>
-            </ul>
-          </div>
-        )}
+        ))}
       </div>
     </div>
   )
