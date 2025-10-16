@@ -192,8 +192,8 @@ class NomenclatureProcessor:
 
             tree.append(tree_item)
 
-        # Sort by NC code
-        tree.sort(key=lambda x: x['nc'])
+        # Sort by NC code (empty strings last, then alphanumeric)
+        tree.sort(key=lambda x: (x['nc'] == '', x['nc']))
         return tree
 
     def save_outputs(self, flattened: List[dict], tree: List[dict]):
