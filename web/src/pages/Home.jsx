@@ -1,102 +1,8 @@
 import { useState, useEffect, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 
-function TreeNode({ node, level = 0, filter }) {
-  const [isOpen, setIsOpen] = useState(level < 2) // Auto-expand first 2 levels
-  const hasChildren = node.children && node.children.length > 0
-
-  const displayName = node.name_ro || node.name_ru || node.name_en || 'Unnamed'
-  const displayCode = node.nc || ''
-
-  // Auto-expand if filter is active and has matching children
-  useEffect(() => {
-    if (filter && hasChildren) {
-      setIsOpen(true)
-    }
-  }, [filter, hasChildren])
-
-  // Check if this node or any child matches filter
-  const matchesFilter = useMemo(() => {
-    if (!filter || !filter.trim()) return true
-
-    const searchLower = filter.toLowerCase().trim()
-    const nodeMatches =
-      displayName.toLowerCase().includes(searchLower) ||
-      displayCode.toLowerCase().includes(searchLower)
-
-    // If this node matches, show it
-    if (nodeMatches) return true
-
-    // Check if any child matches (recursive)
-    const hasMatchingChild = (currentNode) => {
-      if (!currentNode.children || currentNode.children.length === 0) return false
-
-      return currentNode.children.some(child => {
-        const childName = (child.name_ro || child.name_ru || child.name_en || '').toLowerCase()
-        const childCode = (child.nc || '').toLowerCase()
-
-        // Check if this child matches
-        if (childName.includes(searchLower) || childCode.includes(searchLower)) {
-          return true
-        }
-
-        // Recursively check child's children
-        return hasMatchingChild(child)
-      })
-    }
-
-    return hasMatchingChild(node)
-  }, [filter, displayName, displayCode, node])
-
-  if (!matchesFilter) return null
-
-  return (
-    <div className="tree-node">
-      <div
-        className="tree-node-content"
-        style={{ paddingLeft: `${level * 24}px` }}
-      >
-        {hasChildren && (
-          <button
-            className="tree-toggle"
-            onClick={() => setIsOpen(!isOpen)}
-            aria-label={isOpen ? 'Collapse' : 'Expand'}
-          >
-            {isOpen ? '▼' : '▶'}
-          </button>
-        )}
-        {!hasChildren && <span className="tree-spacer"></span>}
-
-        <Link
-          to={`/category/${node.id}`}
-          className="tree-node-link"
-        >
-          {displayCode && <span className="tree-code">{displayCode}</span>}
-          <span className="tree-name">{displayName}</span>
-          {node.import_acts && node.import_acts.length > 0 && (
-            <span className="tree-badge">{node.import_acts.length} acts</span>
-          )}
-        </Link>
-      </div>
-
-      {hasChildren && isOpen && (
-        <div className="tree-children">
-          {node.children.map(child => (
-            <TreeNode
-              key={child.id}
-              node={child}
-              level={level + 1}
-              filter={filter}
-            />
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
 function Home() {
-  const [treeData, setTreeData] = useState([])
+  const [flatData, setFlatData] = useState([])
   const [filter, setFilter] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -104,7 +10,26 @@ function Home() {
     fetch('/data/nomenclature_tree.json')
       .then(res => res.json())
       .then(data => {
-        setTreeData(data)
+        // Flatten the tree into a simple array with level info
+        const flattened = []
+        const flatten = (nodes, level = 0) => {
+          nodes.forEach(node => {
+            flattened.push({
+              id: node.id,
+              nc: node.nc || '',
+              name_ro: node.name_ro || '',
+              name_ru: node.name_ru || '',
+              name_en: node.name_en || '',
+              import_acts: node.import_acts || [],
+              level
+            })
+            if (node.children && node.children.length > 0) {
+              flatten(node.children, level + 1)
+            }
+          })
+        }
+        flatten(data)
+        setFlatData(flattened)
         setLoading(false)
       })
       .catch(err => {
@@ -112,6 +37,18 @@ function Home() {
         setLoading(false)
       })
   }, [])
+
+  // Filter the flat list
+  const filteredData = useMemo(() => {
+    if (!filter.trim()) return flatData
+
+    const searchLower = filter.toLowerCase().trim()
+    return flatData.filter(item => {
+      const displayName = (item.name_ro || item.name_ru || item.name_en).toLowerCase()
+      const displayCode = item.nc.toLowerCase()
+      return displayName.includes(searchLower) || displayCode.includes(searchLower)
+    })
+  }, [flatData, filter])
 
   if (loading) {
     return (
@@ -139,16 +76,40 @@ function Home() {
             Clear
           </button>
         )}
+        <div className="tree-count">
+          {filteredData.length.toLocaleString()} items
+        </div>
       </div>
 
       <div className="tree-view">
-        {treeData.map(node => (
-          <TreeNode
-            key={node.id}
-            node={node}
-            filter={filter}
-          />
-        ))}
+        {filteredData.length > 0 ? (
+          filteredData.map(item => {
+            const displayName = item.name_ro || item.name_ru || item.name_en || 'Unnamed'
+            const displayCode = item.nc
+
+            return (
+              <div key={item.id} className="tree-row">
+                <div
+                  className="tree-node-content"
+                  style={{ paddingLeft: `${item.level * 24}px` }}
+                >
+                  <Link
+                    to={`/category/${item.id}`}
+                    className="tree-node-link"
+                  >
+                    {displayCode && <span className="tree-code">{displayCode}</span>}
+                    <span className="tree-name">{displayName}</span>
+                    {item.import_acts && item.import_acts.length > 0 && (
+                      <span className="tree-badge">{item.import_acts.length} acts</span>
+                    )}
+                  </Link>
+                </div>
+              </div>
+            )
+          })
+        ) : (
+          <div className="no-items">No items found</div>
+        )}
       </div>
     </div>
   )

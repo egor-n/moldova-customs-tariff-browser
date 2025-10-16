@@ -72,10 +72,10 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: calc(100vh - 180px);
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 2rem;
+  overflow: hidden;
 }
 
 .tree-header {
@@ -88,6 +88,7 @@
   display: flex;
   gap: 1rem;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .tree-filter {
@@ -126,8 +127,18 @@
   padding: 1rem 0;
 }
 
+.tree-row {
+  font-size: 0.95rem;
+}
+
 .tree-node {
   font-size: 0.95rem;
+}
+
+.tree-count {
+  color: #6c757d;
+  font-size: 0.9rem;
+  white-space: nowrap;
 }
 
 .tree-node-content {
