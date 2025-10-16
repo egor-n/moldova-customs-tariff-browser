@@ -1,7 +1,7 @@
-# Raw data and outputs
-raw_responses/
-data/
-logs/
+# Raw data and outputs (scraper)
+scraper/raw_responses/
+scraper/data/
+scraper/logs/
 
 # Python
 __pycache__/

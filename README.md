@@ -15,6 +15,7 @@ This project provides tools to:
 
 ### 1. Install dependencies
 ```bash
+cd scraper
 pip install -r requirements.txt
 ```
 
@@ -64,14 +65,18 @@ python search.py "textile" --limit=20 --acts
 ## Project Structure
 
 ```
-├── scraper.py           # API scraper (recursive, rate-limited)
-├── processor.py         # Data processor (builds structured outputs)
-├── search.py           # Simple keyword search utility
-├── PLAN.md             # Detailed implementation plan
-├── requirements.txt    # Python dependencies
-├── raw_responses/      # Raw API responses (one file per request)
-├── data/               # Processed data (flat and tree formats)
-└── logs/               # Scraping and processing logs
+├── scraper/             # Python scraper and tools
+│   ├── scraper.py       # API scraper (sequential, rate-limited)
+│   ├── processor.py     # Data processor (builds structured outputs)
+│   ├── search.py        # Simple keyword search utility
+│   ├── stats.py         # Statistics viewer
+│   ├── PLAN.md          # Detailed implementation plan
+│   ├── EXAMPLE_USAGE.md # AI-powered search examples
+│   ├── requirements.txt # Python dependencies
+│   ├── raw_responses/   # Raw API responses (gitignored)
+│   ├── data/            # Processed data (gitignored)
+│   └── logs/            # Scraping logs (gitignored)
+└── README.md            # This file
 ```
 
 ## Features
