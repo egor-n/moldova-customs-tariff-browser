@@ -72,10 +72,37 @@
   display: flex;
   flex-direction: column;
   width: 100%;
-  max-width: 1400px;
+  max-width: 700px;
   margin: 0 auto;
   padding: 0 2rem;
   overflow: hidden;
+  position: relative;
+}
+
+/* Toast Notification */
+.toast {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #48bb78;
+  color: white;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  animation: slideIn 0.3s ease-out;
+  font-weight: 500;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
 }
 
 .tree-header {
@@ -143,14 +170,9 @@
 
 .tree-node-content {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  align-items: flex-start;
+  gap: 0.75rem;
   padding: 0.4rem 0;
-  transition: background 0.15s;
-}
-
-.tree-node-content:hover {
-  background: #f7fafc;
 }
 
 .tree-toggle {
@@ -173,26 +195,6 @@
   border-radius: 4px;
 }
 
-.tree-spacer {
-  width: 20px;
-  flex-shrink: 0;
-}
-
-.tree-node-link {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  text-decoration: none;
-  color: #2d3748;
-  padding: 0.25rem 0.5rem;
-  border-radius: 4px;
-  transition: background 0.15s;
-}
-
-.tree-node-link:hover {
-  background: #edf2f7;
-}
 
 .tree-code {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -202,14 +204,23 @@
   font-family: 'Courier New', monospace;
   font-weight: 600;
   font-size: 0.85rem;
-  min-width: 80px;
-  text-align: center;
+  min-width: 100px;
+  text-align: left;
   flex-shrink: 0;
+  align-self: flex-start;
+  transition: all 0.2s;
+  user-select: none;
+}
+
+.tree-code:not(:empty):not([style*="cursor: default"]):hover {
+  filter: brightness(1.1);
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
 .tree-name {
   flex: 1;
   color: #2d3748;
+  line-height: 1.6;
 }
 
 .tree-badge {
