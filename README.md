@@ -1,167 +1,171 @@
-# Moldova Tariff Nomenclature Scraper
+# Moldova Tariff Nomenclature
 
-Scrapes hierarchical tariff/tax data from Moldova's trade.gov.md API for AI-powered search and analysis.
+A complete solution for accessing, processing, and browsing Moldova's customs tariff nomenclature data from trade.gov.md.
 
 ## Overview
 
-This project provides tools to:
-1. **Scrape** all tariff nomenclature data from Moldova's trade API (15,067 items)
-2. **Process** raw data into structured formats with hierarchical paths
-3. **Search** through the data using keywords or AI tools
+This monorepo contains:
+1. **Scraper** - Python tools to fetch and process 15,067 tariff items from Moldova's API
+2. **Web App** - React SPA for browsing the nomenclature with advanced search
 
-**Note**: The API returns ALL items in a flat paginated list with parent/child relationships as metadata. No recursive fetching needed!
+**Live Demo**: Browse the hierarchical tariff structure with instant search, wildcard filtering, and clipboard integration.
 
 ## Quick Start
 
-### 1. Install dependencies
+### Web App (Recommended)
+
+```bash
+cd web
+npm install
+npm run dev
+```
+
+Open http://localhost:5173 to browse the nomenclature.
+
+### Scraper (Data Collection)
+
 ```bash
 cd scraper
 pip install -r requirements.txt
-```
 
-### 2. Test the scraper (dry run)
-```bash
+# Test scraper (dry run - first page only)
 python scraper.py --dry-run
-```
 
-This fetches only the first page to show scope (15,067 total items across ~302 pages).
-
-### 3. Run the full scraper
-```bash
+# Full scrape (~12-15 minutes)
 python scraper.py
-```
 
-**Estimated time**: ~12-15 minutes (302 pages × 2.5 sec/page)
-
-The scraper will:
-- Fetch all pages sequentially (no recursion needed - API returns everything)
-- Save each page to `raw_responses/page_{N}.json`
-- Skip existing files (safe to interrupt and resume)
-- Add 2-3 second delays between requests
-- Log all activity to `logs/`
-
-### 4. Process the raw data
-```bash
+# Process raw data into structured formats
 python processor.py
-```
 
-This creates:
-- `data/nomenclature_flat.json`: Flattened array with full hierarchical paths
-- `data/nomenclature_tree.json`: Nested tree structure
-- Statistics and logs
-
-### 5. Search the data
-```bash
-# Basic search
-python search.py "furniture"
-
-# Search in Romanian
-python search.py "mobilă" --lang=ro
-
-# Show more results with regulatory acts
-python search.py "textile" --limit=20 --acts
+# Copy processed data to web app
+cp data/nomenclature_tree.json ../web/public/data/
 ```
 
 ## Project Structure
 
 ```
-├── scraper/             # Python scraper and tools
-│   ├── scraper.py       # API scraper (sequential, rate-limited)
-│   ├── processor.py     # Data processor (builds structured outputs)
-│   ├── search.py        # Simple keyword search utility
-│   ├── stats.py         # Statistics viewer
-│   ├── PLAN.md          # Detailed implementation plan
-│   ├── EXAMPLE_USAGE.md # AI-powered search examples
-│   ├── requirements.txt # Python dependencies
-│   ├── raw_responses/   # Raw API responses (gitignored)
-│   ├── data/            # Processed data (gitignored)
-│   └── logs/            # Scraping logs (gitignored)
-└── README.md            # This file
+├── scraper/                    # Python data collection tools
+│   ├── scraper.py              # API scraper (sequential, rate-limited)
+│   ├── processor.py            # Data processor (builds tree/flat formats)
+│   ├── search.py               # CLI keyword search utility
+│   ├── stats.py                # Statistics viewer
+│   ├── requirements.txt        # Python dependencies
+│   ├── raw_responses/          # Raw API responses (gitignored)
+│   ├── data/                   # Processed data (gitignored)
+│   └── logs/                   # Scraping logs (gitignored)
+│
+├── web/                        # React SPA for browsing
+│   ├── src/
+│   │   ├── pages/
+│   │   │   ├── Home.jsx        # Main list view with search
+│   │   │   └── Category.jsx    # Detail view (unused)
+│   │   ├── App.jsx             # Main app layout
+│   │   └── App.css             # Styling
+│   ├── public/
+│   │   └── data/               # Processed JSON (nomenclature_tree.json)
+│   ├── netlify.toml            # Netlify deployment config
+│   └── package.json
+│
+└── README.md                   # This file
 ```
 
 ## Features
 
+### Web App
+- **Hierarchical display**: All 15,067 items with visual indentation
+- **Instant search**: Debounced (150ms) with diacritics-insensitive matching
+- **Wildcard search**: Use `*` suffix (e.g., `0101*`) for prefix matching on NC codes
+- **Clipboard copy**: Click any NC code to copy to clipboard with toast notification
+- **Multilingual**: Displays Romanian, Russian, and English names
+- **Responsive**: Clean 700px centered layout
+- **Fast**: Renders full flattened tree with browser optimizations
+
 ### Scraper
 - **Resume capability**: Skips already-downloaded files
 - **Rate limiting**: 2-3 seconds between requests with exponential backoff
-- **Safety net**: All raw responses saved individually (never lost)
+- **Safety net**: All raw responses saved individually
 - **Progress tracking**: Detailed logging to console and file
 - **Error handling**: Retries with exponential backoff on network errors
 
 ### Processor
-- **Hierarchical paths**: Full breadcrumb trails for each item
-- **Parent chains**: Complete ancestry for tree navigation
+- **Tree structure**: Builds proper hierarchical JSON with nested children
+- **Proper ordering**: NC codes first, then empty values (category headers)
 - **Multilingual**: Preserves all languages (EN, RO, RU)
 - **Regulatory info**: Import/export/transit acts included
 - **Statistics**: Depth analysis, act counts, etc.
 
-### Search
-- **Keyword search**: Search by name, path, info, or NC code
-- **Multilingual**: Search in English, Romanian, or Russian
-- **Flexible**: Adjustable result limits
-- **AI-ready**: Data optimized for embedding-based search
-
 ## Data Format
 
-### Flattened JSON Structure
+### Tree JSON Structure (used by web app)
 ```json
-{
-  "id": 61034,
-  "nc": "010121000",
-  "parent_id": 61033,
-  "parent_chain": [61032, 61033, 61034],
-  "path_en": "Horses, asses, mules and hinnies, live: > – Horses: > – – Pure-bred breeding animals",
-  "path_ro": "...",
-  "path_ru": "...",
-  "name_en": "– – Pure-bred breeding animals",
-  "name_ro": "...",
-  "name_ru": "...",
-  "info_en": "Operations for import, export and transit...",
-  "children_count": 0,
-  "import_acts": [...],
-  "export_acts": [...],
-  "transit_acts": [...]
-}
+[
+  {
+    "id": 61032,
+    "nc": "0101",
+    "name_en": "Horses, asses, mules and hinnies, live",
+    "name_ro": "Cai, măgari, catâri şi bardoi, vii",
+    "name_ru": "Лошади, ослы, мулы и лошаки, живые",
+    "import_acts": [...],
+    "export_acts": [...],
+    "transit_acts": [...],
+    "children": [
+      {
+        "id": 61033,
+        "nc": "",
+        "name_en": "– Horses:",
+        "children": [...]
+      }
+    ]
+  }
+]
 ```
 
-## Use Cases
+Properly ordered at each level: items with NC codes first (sorted), then category headers without codes.
 
-### AI-Powered Search
-Load `data/nomenclature_flat.json` into your AI tool:
-- **Semantic search**: "wooden children's bed" → find correct tariff code
-- **Classification**: Automatically categorize products
-- **Compliance**: Check import/export requirements
+## Deployment
 
-### Data Analysis
-- Analyze tariff structure and hierarchy
-- Compare regulatory requirements across categories
-- Generate reports on product classifications
+### Netlify
+The web app is configured for Netlify deployment:
+
+```bash
+cd web
+npm run build
+```
+
+Deploy the `dist/` folder to Netlify. The `netlify.toml` handles:
+- SPA routing redirects
+- Cache headers for static assets
+- Optimal serving of the 9.5MB nomenclature_tree.json
+
+## Data Statistics
+
+- **Total items**: 15,067
+- **Root categories**: 1,262 (no parent)
+- **Leaf items**: 9,889 (most specific classifications)
+- **Hierarchy depth**: Up to 9 levels
+- **With import acts**: 3,520+ items
+- **Data size**: 9.5MB (tree JSON), 14.7MB (flat JSON)
 
 ## API Information
 
 - **Base URL**: `https://trade.gov.md/api/tarim-nomenclature/`
-- **Total items**: 15,067
-- **Pages**: 302 (50 items per page)
-- **Hierarchy depth**: Up to 9 levels
-- **Data structure**: Flat list with parent/child relationships in metadata
-- **Rate limits**: None specified (we use 2-3 sec delays to be respectful)
+- **Total pages**: 302 (50 items per page)
+- **Data structure**: Flat paginated list with parent/child relationships
+- **Rate limits**: None specified (scraper uses 2-3 sec delays)
 
-## Notes
+## Search Examples
 
-- The API returns ALL items without needing recursive category fetching
-- The `parent` field creates the hierarchy - processor builds the tree structure
-- The scraper is designed to be interrupted (Ctrl+C) and resumed safely
-- All raw responses are preserved for auditing and re-processing
-- The data includes regulatory acts and multilingual descriptions
-- Maximum hierarchy depth: 9 levels
-- Root categories: 1,262 items (items without a parent)
+### Web App
+- `cai` → matches "Cai, măgari, catâri şi bardoi, vii" (ignores diacritics)
+- `0101*` → shows all NC codes starting with 0101
+- `furniture` → searches across all language fields
 
-## Troubleshooting
+### CLI (scraper/search.py)
+```bash
+python search.py "mobilă" --lang=ro --limit=10
+python search.py "textile" --acts
+```
 
-**"No JSON files found"**: Run `scraper.py` first to download data
+## License
 
-**Rate limited (429)**: The scraper handles this automatically with exponential backoff
-
-**Incomplete scrape**: Just re-run `scraper.py` - it will skip existing files and continue
-
-**Search returns nothing**: Try a different language with `--lang=ro` or broader terms
+Data sourced from Moldova's official trade.gov.md API. Check their terms of use for data usage rights.
