@@ -112,7 +112,13 @@ function Home() {
           </span>
           <span
             className="tree-name"
-            style={{ paddingLeft: `${item.level * 24}px` }}
+            style={{
+              paddingLeft: `${item.level * 24}px`,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}
+            title={displayName}
           >
             {displayName}
           </span>
