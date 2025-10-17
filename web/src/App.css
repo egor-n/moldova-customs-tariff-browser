@@ -157,7 +157,8 @@
 .tree-view {
   flex: 1;
   overflow: hidden;
-  padding: 0;
+  padding: 0 0 1rem 0;
+  min-height: 0;
 }
 
 .tree-row {
