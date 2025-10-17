@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { List } from 'react-window'
+import Fuse from 'fuse.js'
 
 function Home() {
   const [flatData, setFlatData] = useState([])
@@ -73,28 +74,43 @@ function Home() {
       })
   }, [])
 
-  // Filter the flat list
+  // Initialize Fuse.js for fuzzy search
+  const fuse = useMemo(() => {
+    return new Fuse(flatData, {
+      keys: [
+        { name: 'name_ro', weight: 0.4 },
+        { name: 'name_ru', weight: 0.3 },
+        { name: 'name_en', weight: 0.2 },
+        { name: 'nc', weight: 0.1 }
+      ],
+      threshold: 0.3,        // 0 = exact, 1 = match anything (0.3 = moderate fuzziness)
+      distance: 100,         // Max distance from start for typo
+      ignoreLocation: true,  // Match anywhere in string
+      minMatchCharLength: 2  // Minimum characters to trigger match
+    })
+  }, [flatData])
+
+  // Filter the flat list with fuzzy search
   const filteredData = useMemo(() => {
     if (!debouncedFilter.trim()) return flatData
 
     const searchTrimmed = debouncedFilter.trim()
     const isWildcard = searchTrimmed.endsWith('*')
     const searchValue = isWildcard ? searchTrimmed.slice(0, -1) : searchTrimmed
-    const searchNormalized = normalizeText(searchValue)
 
-    return flatData.filter(item => {
-      const displayName = normalizeText(item.name_ro || item.name_ru || item.name_en)
-      const displayCode = normalizeText(item.nc)
-
-      // If wildcard search, only match NC codes that start with the pattern
-      if (isWildcard) {
+    // Wildcard search - exact prefix match on NC codes
+    if (isWildcard) {
+      const searchNormalized = normalizeText(searchValue)
+      return flatData.filter(item => {
+        const displayCode = normalizeText(item.nc)
         return displayCode.startsWith(searchNormalized)
-      }
+      })
+    }
 
-      // Regular search - match anywhere in name or code
-      return displayName.includes(searchNormalized) || displayCode.includes(searchNormalized)
-    })
-  }, [flatData, debouncedFilter])
+    // Fuzzy search
+    const results = fuse.search(searchValue)
+    return results.map(result => result.item)
+  }, [flatData, debouncedFilter, fuse])
 
   // Helper to get primary customs rate
   const getPrimaryCustomsRate = (taxValues) => {
