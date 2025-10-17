@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
+import { List } from 'react-window'
 
 function Home() {
   const [flatData, setFlatData] = useState([])
@@ -90,6 +91,39 @@ function Home() {
     })
   }, [flatData, debouncedFilter])
 
+  // Row component for List
+  const Row = ({ index, style, items, onCopyCode }) => {
+    const item = items[index]
+    if (!item) return null
+
+    const displayName = item.name_ro || item.name_ru || item.name_en || 'Unnamed'
+    const displayCode = item.nc
+
+    return (
+      <div style={style} className="tree-row">
+        <div className="tree-node-content">
+          <span
+            className="tree-code"
+            onClick={() => onCopyCode(displayCode)}
+            title={displayCode ? 'Click to copy' : ''}
+            style={{ cursor: displayCode ? 'pointer' : 'default' }}
+          >
+            {displayCode || '\u00A0'}
+          </span>
+          <span
+            className="tree-name"
+            style={{ paddingLeft: `${item.level * 24}px` }}
+          >
+            {displayName}
+          </span>
+          {item.import_acts && item.import_acts.length > 0 && (
+            <span className="tree-badge">{item.import_acts.length} acts</span>
+          )}
+        </div>
+      </div>
+    )
+  }
+
   if (loading) {
     return (
       <div className="tree-container">
@@ -129,34 +163,12 @@ function Home() {
 
       <div className="tree-view">
         {filteredData.length > 0 ? (
-          filteredData.map(item => {
-            const displayName = item.name_ro || item.name_ru || item.name_en || 'Unnamed'
-            const displayCode = item.nc
-
-            return (
-              <div key={item.id} className="tree-row">
-                <div className="tree-node-content">
-                  <span
-                    className="tree-code"
-                    onClick={() => copyToClipboard(displayCode)}
-                    title={displayCode ? 'Click to copy' : ''}
-                    style={{ cursor: displayCode ? 'pointer' : 'default' }}
-                  >
-                    {displayCode || '\u00A0'}
-                  </span>
-                  <span
-                    className="tree-name"
-                    style={{ paddingLeft: `${item.level * 24}px` }}
-                  >
-                    {displayName}
-                  </span>
-                  {item.import_acts && item.import_acts.length > 0 && (
-                    <span className="tree-badge">{item.import_acts.length} acts</span>
-                  )}
-                </div>
-              </div>
-            )
-          })
+          <List
+            rowComponent={Row}
+            rowCount={filteredData.length}
+            rowHeight={40}
+            rowProps={{ items: filteredData, onCopyCode: copyToClipboard }}
+          />
         ) : (
           <div className="no-items">No items found</div>
         )}
