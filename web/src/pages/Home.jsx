@@ -37,13 +37,14 @@ function Home() {
   }, [filter])
 
   useEffect(() => {
-    fetch('/data/nomenclature_tree.json')
+    fetch('/data/nomenclature_tree_with_tax.json')
       .then(res => res.json())
       .then(data => {
         // Flatten the tree into a simple array with level info
         const flattened = []
         const flatten = (nodes, level = 0) => {
           nodes.forEach(node => {
+            const taxInfo = node.tax_info || {}
             flattened.push({
               id: node.id,
               nc: node.nc || '',
@@ -51,7 +52,11 @@ function Home() {
               name_ru: node.name_ru || '',
               name_en: node.name_en || '',
               import_acts: node.import_acts || [],
-              level
+              level,
+              // Tax information
+              vat: taxInfo.vat || '',
+              excise: taxInfo.excise || '',
+              tax_values: taxInfo.tax_values || []
             })
             if (node.children && node.children.length > 0) {
               flatten(node.children, level + 1)
@@ -91,40 +96,54 @@ function Home() {
     })
   }, [flatData, debouncedFilter])
 
-  // Row component for List
+  // Helper to get primary customs rate
+  const getPrimaryCustomsRate = (taxValues) => {
+    if (!taxValues || taxValues.length === 0) return '-'
+    // Find first non-empty rate
+    const nonEmpty = taxValues.find(tv => tv.tax_value && tv.tax_value.trim())
+    return nonEmpty ? nonEmpty.tax_value : '-'
+  }
+
+  // Helper to format customs tooltip
+  const getCustomsTooltip = (taxValues) => {
+    if (!taxValues || taxValues.length === 0) return ''
+    return taxValues
+      .map(tv => `Country ${tv.country}: ${tv.tax_value || 'N/A'}`)
+      .join('\n')
+  }
+
+  // Row component for List (table layout)
   const Row = ({ index, style, items, onCopyCode }) => {
     const item = items[index]
     if (!item) return null
 
     const displayName = item.name_ro || item.name_ru || item.name_en || 'Unnamed'
     const displayCode = item.nc
+    const customsRate = getPrimaryCustomsRate(item.tax_values)
+    const customsTooltip = getCustomsTooltip(item.tax_values)
 
     return (
-      <div style={style} className="tree-row">
-        <div className="tree-node-content" style={{ padding: '0.25rem 0' }}>
-          <span
-            className="tree-code"
-            onClick={() => onCopyCode(displayCode)}
-            title={displayCode ? 'Click to copy' : ''}
-            style={{ cursor: displayCode ? 'pointer' : 'default' }}
-          >
-            {displayCode || '\u00A0'}
-          </span>
-          <span
-            className="tree-name"
-            style={{
-              paddingLeft: `${item.level * 24}px`,
-              whiteSpace: 'nowrap',
-              overflow: 'hidden',
-              textOverflow: 'ellipsis'
-            }}
-            title={displayName}
-          >
-            {displayName}
-          </span>
-          {item.import_acts && item.import_acts.length > 0 && (
-            <span className="tree-badge">{item.import_acts.length} acts</span>
-          )}
+      <div style={style} className="table-row">
+        <div className="table-cell table-cell-code"
+             onClick={() => onCopyCode(displayCode)}
+             title={displayCode ? 'Click to copy' : ''}
+             style={{ cursor: displayCode ? 'pointer' : 'default' }}>
+          {displayCode || '\u00A0'}
+        </div>
+        <div className="table-cell table-cell-name"
+             style={{ paddingLeft: `${item.level * 24}px` }}
+             title={displayName}>
+          {displayName}
+        </div>
+        <div className="table-cell table-cell-tax">
+          {item.vat || '-'}
+        </div>
+        <div className="table-cell table-cell-tax"
+             title={customsTooltip}>
+          {customsRate}
+        </div>
+        <div className="table-cell table-cell-tax">
+          {item.excise || '-'}
         </div>
       </div>
     )
@@ -168,6 +187,13 @@ function Home() {
       </div>
 
       <div className="tree-view">
+        <div className="table-header">
+          <div className="table-cell table-cell-code">NC Code</div>
+          <div className="table-cell table-cell-name">Name</div>
+          <div className="table-cell table-cell-tax">VAT</div>
+          <div className="table-cell table-cell-tax">Customs</div>
+          <div className="table-cell table-cell-tax">Excise</div>
+        </div>
         {filteredData.length > 0 ? (
           <List
             rowComponent={Row}
