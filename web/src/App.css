@@ -317,9 +317,10 @@
   width: 95px;
   flex-shrink: 0;
   text-align: right;
-  font-family: 'Courier New', monospace;
-  font-size: 0.85rem;
-  color: #495057;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #2d3748;
 }
 
 .table-cell-tax-customs {
