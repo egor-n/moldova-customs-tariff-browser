@@ -164,7 +164,7 @@ class NomenclatureProcessor:
         return flattened
 
     def build_tree_structure(self, parent_id: Optional[int] = None) -> List[dict]:
-        """Recursively build hierarchical tree structure"""
+        """Recursively build hierarchical tree structure (optimized for web app)"""
         children = self.children_by_parent.get(parent_id, [])
         tree = []
 
@@ -172,18 +172,13 @@ class NomenclatureProcessor:
             item_id = item['id']
             i18n = item.get('i18n', {})
 
+            # Only include fields used by the web app
             tree_item = {
                 'id': item_id,
                 'nc': item.get('nc', ''),
                 'name_en': i18n.get('en', {}).get('name', ''),
                 'name_ro': i18n.get('ro', {}).get('name', ''),
                 'name_ru': i18n.get('ru', {}).get('name', ''),
-                'info_en': i18n.get('en', {}).get('info', ''),
-                'info_ro': i18n.get('ro', {}).get('info', ''),
-                'info_ru': i18n.get('ru', {}).get('info', ''),
-                'import_acts': item.get('import_acts', []),
-                'export_acts': item.get('export_acts', []),
-                'transit_acts': item.get('transit_acts', []),
             }
 
             # Recursively add children

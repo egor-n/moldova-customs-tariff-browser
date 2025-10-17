@@ -89,7 +89,7 @@ class TaxDataMerger:
         return value.replace(' %', '%').strip()
 
     def extract_tax_info(self, tax_data: dict) -> dict:
-        """Extract relevant tax information from API response"""
+        """Extract relevant tax information from API response (optimized for web app)"""
         if not tax_data:
             return {}
 
@@ -102,24 +102,11 @@ class TaxDataMerger:
                 'tax_value': self.normalize_percentage(tv.get('tax_value', ''))
             })
 
+        # Only include fields used by the web app
         return {
             'vat': self.normalize_percentage(tax_data.get('vat', '')),
             'excise': self.normalize_percentage(tax_data.get('excise', '')),
-            'vat_exemption_ro': tax_data.get('i18n', {}).get('ro', {}).get('vat_exemption', ''),
-            'vat_exemption_ru': tax_data.get('i18n', {}).get('ru', {}).get('vat_exemption', ''),
-            'vat_exemption_en': tax_data.get('i18n', {}).get('en', {}).get('vat_exemption', ''),
-            'tax_customs_ro': tax_data.get('i18n', {}).get('ro', {}).get('tax_customs', ''),
-            'tax_customs_ru': tax_data.get('i18n', {}).get('ru', {}).get('tax_customs', ''),
-            'tax_customs_en': tax_data.get('i18n', {}).get('en', {}).get('tax_customs', ''),
-            'excise_exempted_ro': tax_data.get('i18n', {}).get('ro', {}).get('excise_exempted', ''),
-            'excise_exempted_ru': tax_data.get('i18n', {}).get('ru', {}).get('excise_exempted', ''),
-            'excise_exempted_en': tax_data.get('i18n', {}).get('en', {}).get('excise_exempted', ''),
-            'export_ro': tax_data.get('i18n', {}).get('ro', {}).get('export', ''),
-            'export_ru': tax_data.get('i18n', {}).get('ru', {}).get('export', ''),
-            'export_en': tax_data.get('i18n', {}).get('en', {}).get('export', ''),
             'tax_values': normalized_tax_values,
-            'valid_from': tax_data.get('valid_from', ''),
-            'valid_to': tax_data.get('valid_to', ''),
         }
 
     def merge_flat_data(self) -> List[dict]:
