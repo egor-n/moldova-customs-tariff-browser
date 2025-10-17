@@ -3,6 +3,7 @@ scraper/raw_responses/
 scraper/tax_responses/
 scraper/data/
 scraper/logs/
+scraper/*.tar.gz
 
 # Python
 __pycache__/
