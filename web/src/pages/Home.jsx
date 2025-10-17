@@ -138,7 +138,7 @@ function Home() {
         <div className="table-cell table-cell-tax">
           {item.vat || '-'}
         </div>
-        <div className="table-cell table-cell-tax"
+        <div className="table-cell table-cell-tax table-cell-tax-customs"
              title={customsTooltip}>
           {customsRate}
         </div>
@@ -193,7 +193,7 @@ function Home() {
           <div className="table-cell table-cell-tax">
             VAT <span className="info-icon" title="Value Added Tax - Domestic consumption tax">ⓘ</span>
           </div>
-          <div className="table-cell table-cell-tax">
+          <div className="table-cell table-cell-tax table-cell-tax-customs">
             Customs <span className="info-icon" title="Import duty rates by country (hover row for details)">ⓘ</span>
           </div>
           <div className="table-cell table-cell-tax">

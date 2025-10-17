@@ -322,6 +322,10 @@
   color: #495057;
 }
 
+.table-cell-tax-customs {
+  width: 110px;
+}
+
 .info-icon {
   display: inline-block;
   font-size: 0.75rem;
