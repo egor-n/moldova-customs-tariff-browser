@@ -107,7 +107,15 @@ function Home() {
       })
     }
 
-    // Fuzzy search
+    // Check if search is numeric (NC code search)
+    const isNumericSearch = /^[0-9]+$/.test(searchValue)
+
+    if (isNumericSearch) {
+      // Exact match for NC codes (no fuzzy)
+      return flatData.filter(item => item.nc.includes(searchValue))
+    }
+
+    // Fuzzy search for text queries
     const results = fuse.search(searchValue)
     return results.map(result => result.item)
   }, [flatData, debouncedFilter, fuse])
