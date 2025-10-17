@@ -322,6 +322,21 @@
   color: #495057;
 }
 
+.info-icon {
+  display: inline-block;
+  font-size: 0.75rem;
+  color: #6c757d;
+  cursor: help;
+  margin-left: 0.25rem;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+}
+
+.info-icon:hover {
+  opacity: 1;
+  color: #667eea;
+}
+
 /* Category Page */
 .category-page {
   max-width: 1400px;

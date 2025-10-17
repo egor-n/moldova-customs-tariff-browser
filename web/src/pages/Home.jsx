@@ -190,9 +190,15 @@ function Home() {
         <div className="table-header">
           <div className="table-cell table-cell-code">NC Code</div>
           <div className="table-cell table-cell-name">Name</div>
-          <div className="table-cell table-cell-tax">VAT</div>
-          <div className="table-cell table-cell-tax">Customs</div>
-          <div className="table-cell table-cell-tax">Excise</div>
+          <div className="table-cell table-cell-tax">
+            VAT <span className="info-icon" title="Value Added Tax - Domestic consumption tax">ⓘ</span>
+          </div>
+          <div className="table-cell table-cell-tax">
+            Customs <span className="info-icon" title="Import duty rates by country (hover row for details)">ⓘ</span>
+          </div>
+          <div className="table-cell table-cell-tax">
+            Excise <span className="info-icon" title="Excise tax for specific goods (alcohol, tobacco, fuel, etc.)">ⓘ</span>
+          </div>
         </div>
         {filteredData.length > 0 ? (
           <List
