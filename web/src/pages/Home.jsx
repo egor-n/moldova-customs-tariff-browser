@@ -224,16 +224,18 @@ function Home() {
             Excise <span className="info-icon" title="Excise tax for specific goods (alcohol, tobacco, fuel, etc.)">ⓘ</span>
           </div>
         </div>
-        {filteredData.length > 0 ? (
-          <List
-            rowComponent={Row}
-            rowCount={filteredData.length}
-            rowHeight={32}
-            rowProps={{ items: filteredData, onCopyCode: copyToClipboard }}
-          />
-        ) : (
-          <div className="no-items">No items found</div>
-        )}
+        <div style={{ flex: 1, minHeight: 0 }}>
+          {filteredData.length > 0 ? (
+            <List
+              rowComponent={Row}
+              rowCount={filteredData.length}
+              rowHeight={32}
+              rowProps={{ items: filteredData, onCopyCode: copyToClipboard }}
+            />
+          ) : (
+            <div className="no-items">No items found</div>
+          )}
+        </div>
       </div>
     </div>
   )
