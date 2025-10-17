@@ -43,11 +43,17 @@ function Home() {
     fetch('/data/nomenclature_tree_with_tax.json')
       .then(res => res.json())
       .then(data => {
-        // Flatten the tree into a simple array with level info
+        // Flatten the tree into a simple array with level info and parent tracking
         const flattened = []
-        const flatten = (nodes, level = 0) => {
+        const idToIndex = new Map() // Map item ID to its index in flattened array
+
+        const flatten = (nodes, level = 0, parentIds = []) => {
           nodes.forEach(node => {
             const taxInfo = node.tax_info || {}
+            const currentIndex = flattened.length
+
+            idToIndex.set(node.id, currentIndex)
+
             flattened.push({
               id: node.id,
               nc: node.nc || '',
@@ -56,17 +62,25 @@ function Home() {
               name_en: node.name_en || '',
               import_acts: node.import_acts || [],
               level,
+              parentIds: [...parentIds], // Store chain of parent IDs
+              indexInTree: currentIndex, // Store original tree order
               // Tax information
               vat: taxInfo.vat || '',
               excise: taxInfo.excise || '',
               tax_values: taxInfo.tax_values || []
             })
             if (node.children && node.children.length > 0) {
-              flatten(node.children, level + 1)
+              flatten(node.children, level + 1, [...parentIds, node.id])
             }
           })
         }
         flatten(data)
+
+        // Store the ID-to-index map for later use
+        flattened.forEach(item => {
+          item._idToIndex = idToIndex
+        })
+
         setFlatData(flattened)
         setLoading(false)
       })
@@ -92,11 +106,38 @@ function Home() {
     })
   }, [flatData])
 
+  // Helper to include parent items for context
+  const includeParents = (matchedItems) => {
+    if (!matchedItems || !matchedItems.length) return []
+
+    const itemsToShow = new Set()
+
+    // For each matched item, include it and all its parents
+    matchedItems.forEach(item => {
+      if (!item) return
+
+      itemsToShow.add(item.id)
+
+      // Add all parent IDs if they exist
+      if (item.parentIds && Array.isArray(item.parentIds)) {
+        item.parentIds.forEach(parentId => {
+          itemsToShow.add(parentId)
+        })
+      }
+    })
+
+    // Get all items (matched + parents) and sort by original tree order
+    return flatData
+      .filter(item => itemsToShow.has(item.id))
+      .sort((a, b) => a.indexInTree - b.indexInTree)
+  }
+
   // Filter the flat list with fuzzy search
   const filteredData = useMemo(() => {
     if (!debouncedFilter.trim()) return flatData
 
     const searchTrimmed = debouncedFilter.trim()
+    let matchedItems = []
 
     // Exact search - wrapped in double quotes
     const isExactSearch = searchTrimmed.startsWith('"') && searchTrimmed.endsWith('"')
@@ -104,7 +145,7 @@ function Home() {
       const exactValue = searchTrimmed.slice(1, -1) // Remove quotes
       const exactNormalized = normalizeText(exactValue)
 
-      return flatData.filter(item => {
+      matchedItems = flatData.filter(item => {
         const nameRo = normalizeText(item.name_ro)
         const nameRu = normalizeText(item.name_ru)
         const nameEn = normalizeText(item.name_en)
@@ -115,6 +156,7 @@ function Home() {
                nameEn.includes(exactNormalized) ||
                nc.includes(exactNormalized)
       })
+      return includeParents(matchedItems)
     }
 
     const isWildcard = searchTrimmed.endsWith('*')
@@ -123,10 +165,11 @@ function Home() {
     // Wildcard search - exact prefix match on NC codes
     if (isWildcard) {
       const searchNormalized = normalizeText(searchValue)
-      return flatData.filter(item => {
+      matchedItems = flatData.filter(item => {
         const displayCode = normalizeText(item.nc)
         return displayCode.startsWith(searchNormalized)
       })
+      return includeParents(matchedItems)
     }
 
     // Check if search is numeric (NC code search)
@@ -134,12 +177,14 @@ function Home() {
 
     if (isNumericSearch) {
       // Exact match for NC codes (no fuzzy)
-      return flatData.filter(item => item.nc.includes(searchValue))
+      matchedItems = flatData.filter(item => item.nc.includes(searchValue))
+      return includeParents(matchedItems)
     }
 
     // Fuzzy search for text queries
     const results = fuse.search(searchValue)
-    return results.map(result => result.item)
+    matchedItems = results.map(result => result.item)
+    return includeParents(matchedItems)
   }, [flatData, debouncedFilter, fuse])
 
   // Helper to get customs rate for selected country
