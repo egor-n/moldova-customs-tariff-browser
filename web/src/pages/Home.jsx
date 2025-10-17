@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react'
 import { List } from 'react-window'
 import Fuse from 'fuse.js'
+import { COUNTRIES, DEFAULT_COUNTRY_ID } from '../config/countries'
 
 function Home() {
   const [flatData, setFlatData] = useState([])
@@ -8,6 +9,7 @@ function Home() {
   const [debouncedFilter, setDebouncedFilter] = useState('')
   const [loading, setLoading] = useState(true)
   const [toast, setToast] = useState({ show: false, message: '' })
+  const [selectedCountry, setSelectedCountry] = useState(DEFAULT_COUNTRY_ID)
 
   const normalizeText = (text) => {
     return text
@@ -83,7 +85,7 @@ function Home() {
         { name: 'name_en', weight: 0.2 },
         { name: 'nc', weight: 0.1 }
       ],
-      threshold: 0.3,        // 0 = exact, 1 = match anything (0.3 = moderate fuzziness)
+      threshold: 0.1,        // 0 = exact, 1 = match anything (0.1 = low fuzziness, stricter matching)
       distance: 100,         // Max distance from start for typo
       ignoreLocation: true,  // Match anywhere in string
       minMatchCharLength: 2  // Minimum characters to trigger match
@@ -95,6 +97,26 @@ function Home() {
     if (!debouncedFilter.trim()) return flatData
 
     const searchTrimmed = debouncedFilter.trim()
+
+    // Exact search - wrapped in double quotes
+    const isExactSearch = searchTrimmed.startsWith('"') && searchTrimmed.endsWith('"')
+    if (isExactSearch) {
+      const exactValue = searchTrimmed.slice(1, -1) // Remove quotes
+      const exactNormalized = normalizeText(exactValue)
+
+      return flatData.filter(item => {
+        const nameRo = normalizeText(item.name_ro)
+        const nameRu = normalizeText(item.name_ru)
+        const nameEn = normalizeText(item.name_en)
+        const nc = normalizeText(item.nc)
+
+        return nameRo.includes(exactNormalized) ||
+               nameRu.includes(exactNormalized) ||
+               nameEn.includes(exactNormalized) ||
+               nc.includes(exactNormalized)
+      })
+    }
+
     const isWildcard = searchTrimmed.endsWith('*')
     const searchValue = isWildcard ? searchTrimmed.slice(0, -1) : searchTrimmed
 
@@ -120,30 +142,33 @@ function Home() {
     return results.map(result => result.item)
   }, [flatData, debouncedFilter, fuse])
 
-  // Helper to get primary customs rate
-  const getPrimaryCustomsRate = (taxValues) => {
+  // Helper to get customs rate for selected country
+  const getCustomsRate = (taxValues, countryId) => {
     if (!taxValues || taxValues.length === 0) return '-'
-    // Find first non-empty rate
-    const nonEmpty = taxValues.find(tv => tv.tax_value && tv.tax_value.trim())
-    return nonEmpty ? nonEmpty.tax_value : '-'
+    const countryRate = taxValues.find(tv => tv.country === countryId)
+    if (countryRate && countryRate.tax_value && countryRate.tax_value.trim()) {
+      return countryRate.tax_value
+    }
+    return '-'
   }
 
   // Helper to format customs tooltip
   const getCustomsTooltip = (taxValues) => {
     if (!taxValues || taxValues.length === 0) return ''
     return taxValues
-      .map(tv => `Country ${tv.country}: ${tv.tax_value || 'N/A'}`)
+      .filter(tv => tv.tax_value && tv.tax_value.trim())
+      .map(tv => `${COUNTRIES[tv.country] || `Country ${tv.country}`}: ${tv.tax_value}`)
       .join('\n')
   }
 
   // Row component for List (table layout)
-  const Row = ({ index, style, items, onCopyCode }) => {
+  const Row = ({ index, style, items, onCopyCode, countryId }) => {
     const item = items[index]
     if (!item) return null
 
     const displayName = item.name_ro || item.name_ru || item.name_en || 'Unnamed'
     const displayCode = item.nc
-    const customsRate = getPrimaryCustomsRate(item.tax_values)
+    const customsRate = getCustomsRate(item.tax_values, countryId)
     const customsTooltip = getCustomsTooltip(item.tax_values)
 
     return (
@@ -192,7 +217,7 @@ function Home() {
       <div className="tree-header">
         <input
           type="text"
-          placeholder="Filter by NC code or name..."
+          placeholder='Search... (use "quotes" for exact match, * for wildcard)'
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           className="tree-filter"
@@ -205,6 +230,18 @@ function Home() {
             Clear
           </button>
         )}
+        <select
+          value={selectedCountry}
+          onChange={(e) => setSelectedCountry(Number(e.target.value))}
+          className="country-filter"
+          title="Select country for customs rates"
+        >
+          {Object.entries(COUNTRIES).map(([id, name]) => (
+            <option key={id} value={id}>
+              {name}
+            </option>
+          ))}
+        </select>
         <div className="tree-count">
           {filteredData.length.toLocaleString()} items
         </div>
@@ -230,7 +267,7 @@ function Home() {
               rowComponent={Row}
               rowCount={filteredData.length}
               rowHeight={32}
-              rowProps={{ items: filteredData, onCopyCode: copyToClipboard }}
+              rowProps={{ items: filteredData, onCopyCode: copyToClipboard, countryId: selectedCountry }}
             />
           ) : (
             <div className="no-items">No items found</div>
