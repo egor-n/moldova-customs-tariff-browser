@@ -81,14 +81,30 @@ class TaxDataMerger:
         logger.info(f"Loaded {loaded} tax response files")
         logger.info(f"Found tax data for {with_data} NC codes")
 
+    def normalize_percentage(self, value: str) -> str:
+        """Normalize percentage format by removing spaces before %"""
+        if not value:
+            return value
+        # Remove spaces before % sign
+        return value.replace(' %', '%').strip()
+
     def extract_tax_info(self, tax_data: dict) -> dict:
         """Extract relevant tax information from API response"""
         if not tax_data:
             return {}
 
+        # Normalize tax values in taxvalues_set
+        tax_values = tax_data.get('taxvalues_set', [])
+        normalized_tax_values = []
+        for tv in tax_values:
+            normalized_tax_values.append({
+                'country': tv.get('country'),
+                'tax_value': self.normalize_percentage(tv.get('tax_value', ''))
+            })
+
         return {
-            'vat': tax_data.get('vat', ''),
-            'excise': tax_data.get('excise', ''),
+            'vat': self.normalize_percentage(tax_data.get('vat', '')),
+            'excise': self.normalize_percentage(tax_data.get('excise', '')),
             'vat_exemption_ro': tax_data.get('i18n', {}).get('ro', {}).get('vat_exemption', ''),
             'vat_exemption_ru': tax_data.get('i18n', {}).get('ru', {}).get('vat_exemption', ''),
             'vat_exemption_en': tax_data.get('i18n', {}).get('en', {}).get('vat_exemption', ''),
@@ -101,7 +117,7 @@ class TaxDataMerger:
             'export_ro': tax_data.get('i18n', {}).get('ro', {}).get('export', ''),
             'export_ru': tax_data.get('i18n', {}).get('ru', {}).get('export', ''),
             'export_en': tax_data.get('i18n', {}).get('en', {}).get('export', ''),
-            'tax_values': tax_data.get('taxvalues_set', []),
+            'tax_values': normalized_tax_values,
             'valid_from': tax_data.get('valid_from', ''),
             'valid_to': tax_data.get('valid_to', ''),
         }
