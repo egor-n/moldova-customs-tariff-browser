@@ -1,5 +1,6 @@
 # Raw data and outputs (scraper)
 scraper/raw_responses/
+scraper/tax_responses/
 scraper/data/
 scraper/logs/
 
