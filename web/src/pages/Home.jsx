@@ -101,7 +101,7 @@ function Home() {
 
     return (
       <div style={style} className="tree-row">
-        <div className="tree-node-content">
+        <div className="tree-node-content" style={{ padding: '0.25rem 0' }}>
           <span
             className="tree-code"
             onClick={() => onCopyCode(displayCode)}
@@ -166,7 +166,7 @@ function Home() {
           <List
             rowComponent={Row}
             rowCount={filteredData.length}
-            rowHeight={40}
+            rowHeight={32}
             rowProps={{ items: filteredData, onCopyCode: copyToClipboard }}
           />
         ) : (
