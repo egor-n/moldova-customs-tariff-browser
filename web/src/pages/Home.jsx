@@ -1,6 +1,5 @@
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { List } from 'react-window'
-import Fuse from 'fuse.js'
 import { COUNTRIES, DEFAULT_COUNTRY_ID } from '../config/countries'
 
 function Home() {
@@ -126,24 +125,9 @@ function Home() {
       })
   }, [])
 
-  // Initialize Fuse.js for fuzzy search
-  const fuse = useMemo(() => {
-    return new Fuse(flatData, {
-      keys: [
-        { name: 'name_ro', weight: 0.4 },
-        { name: 'name_ru', weight: 0.3 },
-        { name: 'name_en', weight: 0.2 },
-        { name: 'nc', weight: 0.1 }
-      ],
-      threshold: 0.1,        // 0 = exact, 1 = match anything (0.1 = low fuzziness, stricter matching)
-      distance: 100,         // Max distance from start for typo
-      ignoreLocation: true,  // Match anywhere in string
-      minMatchCharLength: 2  // Minimum characters to trigger match
-    })
-  }, [flatData])
 
   // Helper to include parent items for context
-  const includeParents = (matchedItems) => {
+  const includeParents = useCallback((matchedItems) => {
     if (!matchedItems || !matchedItems.length) return []
 
     const itemsToShow = new Set()
@@ -166,7 +150,7 @@ function Home() {
     return flatData
       .filter(item => itemsToShow.has(item.id))
       .sort((a, b) => a.indexInTree - b.indexInTree)
-  }
+  }, [flatData])
 
   // Filter the flat list with fuzzy search
   const filteredData = useMemo(() => {
@@ -218,11 +202,19 @@ function Home() {
       return includeParents(matchedItems)
     }
 
-    // Fuzzy search for text queries
-    const results = fuse.search(searchValue)
-    matchedItems = results.map(result => result.item)
+    // Normalized text search for text queries
+    const searchNormalized = normalizeText(searchValue)
+    matchedItems = flatData.filter(item => {
+      const nameRo = normalizeText(item.name_ro)
+      const nameRu = normalizeText(item.name_ru)
+      const nameEn = normalizeText(item.name_en)
+
+      return nameRo.includes(searchNormalized) ||
+             nameRu.includes(searchNormalized) ||
+             nameEn.includes(searchNormalized)
+    })
     return includeParents(matchedItems)
-  }, [flatData, debouncedFilter, fuse])
+  }, [flatData, debouncedFilter, includeParents])
 
   // Helper to get customs rate for selected country
   const getCustomsRate = (taxValues, countryId) => {
@@ -324,7 +316,7 @@ function Home() {
       <div className="tree-header">
         <input
           type="text"
-          placeholder='Search... (use "quotes" for exact match, * for wildcard)'
+          placeholder='Search names/codes (supports diacritics, use * for NC wildcard)'
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           className="tree-filter"
