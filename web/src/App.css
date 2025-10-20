@@ -211,128 +211,6 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-/* Download Section */
-.download-section {
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  padding: 1.25rem 1.5rem;
-  background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
-  border: 1.5px solid #e2e8f0;
-  border-radius: 12px;
-  margin-top: 1.25rem;
-  margin-bottom: 1.5rem;
-}
-
-.download-info {
-  flex: 1;
-}
-
-.download-info h3 {
-  margin: 0 0 0.375rem 0;
-  font-size: 1rem;
-  font-weight: 700;
-  color: #1e293b;
-  letter-spacing: -0.01em;
-}
-
-.download-info p {
-  margin: 0 0 0.5rem 0;
-  font-size: 0.875rem;
-  color: #64748b;
-  line-height: 1.5;
-}
-
-.download-sample {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  font-size: 0.8125rem;
-  color: #3b82f6;
-  cursor: help;
-  font-weight: 600;
-}
-
-.download-sample-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  border: 1.5px solid #3b82f6;
-  font-size: 0.75rem;
-  font-weight: bold;
-  font-style: normal;
-}
-
-.download-sample-tooltip {
-  position: absolute;
-  top: calc(100% + 12px);
-  left: 0;
-  background: #1e293b;
-  color: #ffffff;
-  padding: 1rem 1.25rem;
-  border-radius: 8px;
-  font-size: 0.8125rem;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Courier New', monospace;
-  z-index: 1000;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
-  min-width: 400px;
-  max-width: 500px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-}
-
-.download-sample:hover .download-sample-tooltip {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-.download-sample-tooltip::after {
-  content: '';
-  position: absolute;
-  bottom: 100%;
-  left: 20px;
-  border: 6px solid transparent;
-  border-bottom-color: #1e293b;
-}
-
-.download-button {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.875rem 1.5rem;
-  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-  color: white;
-  border: none;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 0.9375rem;
-  cursor: pointer;
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.2);
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-}
-
-.download-button:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-}
-
-.download-button:active {
-  transform: translateY(0);
-}
-
-.download-icon {
-  font-size: 1.25rem;
-  font-weight: bold;
-}
 
 /* Tree View */
 .tree-view {
@@ -352,6 +230,12 @@
   font-size: 0.95rem;
 }
 
+.tree-count-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .tree-count {
   color: #64748b;
   font-size: 0.875rem;
@@ -361,6 +245,120 @@
   padding: 0.5rem 1rem;
   border-radius: 8px;
   letter-spacing: 0.01em;
+}
+
+.download-button-wrapper {
+  position: relative;
+}
+
+.download-button-compact {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(16, 185, 129, 0.2);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.download-button-compact:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.download-button-compact:active {
+  transform: translateY(0);
+}
+
+.download-icon-compact {
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.download-tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #1e293b;
+  color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  min-width: 320px;
+  max-width: 400px;
+}
+
+.download-button-wrapper:hover .download-tooltip {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.download-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  right: 20px;
+  border: 6px solid transparent;
+  border-bottom-color: #1e293b;
+}
+
+.download-tooltip-header {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.875rem;
+}
+
+.download-tooltip-body {
+  padding: 1rem;
+}
+
+.download-tooltip-body p {
+  margin: 0 0 0.625rem 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.download-tooltip-body p:last-child {
+  margin-bottom: 0;
+}
+
+.download-tooltip-sample {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.download-tooltip-sample strong {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.download-tooltip-sample pre {
+  margin: 0;
+  padding: 0.625rem;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 6px;
+  font-family: 'SF Mono', 'Monaco', 'Cascadia Code', 'Courier New', monospace;
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: #e2e8f0;
+  overflow-x: auto;
 }
 
 .tree-node-content {
@@ -760,43 +758,6 @@
     padding: 0 1rem;
   }
 
-  .download-section {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 1rem;
-    gap: 1rem;
-  }
-
-  .download-info h3 {
-    font-size: 0.9375rem;
-  }
-
-  .download-info p {
-    font-size: 0.8125rem;
-  }
-
-  .download-sample {
-    font-size: 0.75rem;
-  }
-
-  .download-sample-tooltip {
-    min-width: 300px;
-    max-width: calc(100vw - 2rem);
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .download-sample-tooltip::after {
-    left: 50%;
-    transform: translateX(-50%);
-  }
-
-  .download-button {
-    width: 100%;
-    justify-content: center;
-    padding: 1rem 1.5rem;
-  }
-
   .tree-header {
     flex-wrap: wrap;
     gap: 0.5rem;
@@ -807,9 +768,37 @@
     flex: 1;
   }
 
+  .tree-count-wrapper {
+    width: 100%;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
   .tree-count {
     width: 100%;
     text-align: center;
+  }
+
+  .download-button-wrapper {
+    width: 100%;
+  }
+
+  .download-button-compact {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .download-tooltip {
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: calc(100vw - 2rem);
+  }
+
+  .download-tooltip::after {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
   }
 
   .table-cell-name {

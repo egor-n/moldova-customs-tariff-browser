@@ -371,35 +371,10 @@ function Home() {
         </div>
       )}
 
-      <div className="download-section">
-        <div className="download-info">
-          <h3>LLM-Ready Export</h3>
-          <p>Export all {flatData.length.toLocaleString()} items as markdown (~{(flatData.length * 75 / 1024 / 1024).toFixed(1)} MB).</p>
-          <div className="download-sample">
-            <span className="download-sample-icon">i</span>
-            <span>View sample</span>
-            <div className="download-sample-tooltip">
-              {`- **0101** - Cai, măgari, catâri şi bardoi, vii:
-  - **010121000** - – – Cai
-  - **010129000** - – – Altele
-- **0102** - Animale vii din specia bovine
-  - **01022100** - – – Din rase pentru reproducţie
-    - **010221001** - – – – Vaci
-
-...`}
-            </div>
-          </div>
-        </div>
-        <button className="download-button" onClick={handleDownload}>
-          <span className="download-icon">↓</span>
-          Download
-        </button>
-      </div>
-
       <div className="tree-header">
         <input
           type="text"
-          placeholder='Search names/codes (supports diacritics, use * for NC wildcard)'
+          placeholder='Search names/codes...'
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           className="tree-filter"
@@ -424,8 +399,32 @@ function Home() {
             </option>
           ))}
         </select>
-        <div className="tree-count">
-          {filteredData.length.toLocaleString()} items
+        <div className="tree-count-wrapper">
+          <div className="tree-count">
+            {filteredData.length.toLocaleString()} items
+          </div>
+          <div className="download-button-wrapper">
+            <button className="download-button-compact" onClick={handleDownload}>
+              <span className="download-icon-compact">↓</span>
+              <span>Download for LLM ({(flatData.length * 75 / 1024 / 1024).toFixed(1)}MB)</span>
+            </button>
+            <div className="download-tooltip">
+              <div className="download-tooltip-header">
+                <strong>LLM-Ready Markdown Export</strong>
+              </div>
+              <div className="download-tooltip-body">
+                <p>Export all {flatData.length.toLocaleString()} items as hierarchical markdown</p>
+                <p><strong>File size:</strong> ~{(flatData.length * 75 / 1024 / 1024).toFixed(1)} MB</p>
+                <div className="download-tooltip-sample">
+                  <strong>Format:</strong>
+                  <pre>{`- **0101** - Cai, măgari, catâri...
+  - **010121000** - Cai
+  - **010129000** - Altele
+- **0102** - Animale vii din specia...`}</pre>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
