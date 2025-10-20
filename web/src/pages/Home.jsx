@@ -17,6 +17,30 @@ function Home() {
       .replace(/[\u0300-\u036f]/g, '')
   }
 
+  // Helper to highlight search term in text
+  const highlightText = (text, searchTerm) => {
+    if (!searchTerm || !text) return text
+
+    const normalizedText = normalizeText(text)
+    const normalizedSearch = normalizeText(searchTerm)
+
+    const index = normalizedText.indexOf(normalizedSearch)
+    if (index === -1) return text
+
+    // Find the actual substring in original text that matches
+    const before = text.substring(0, index)
+    const match = text.substring(index, index + normalizedSearch.length)
+    const after = text.substring(index + normalizedSearch.length)
+
+    return (
+      <>
+        {before}
+        <mark className="highlight">{match}</mark>
+        {after}
+      </>
+    )
+  }
+
   const copyToClipboard = async (code) => {
     if (!code || code === '\u00A0') return
 
@@ -236,7 +260,7 @@ function Home() {
   }
 
   // Row component for List (table layout)
-  const Row = ({ index, style, items, onCopyCode, countryId }) => {
+  const Row = ({ index, style, items, onCopyCode, countryId, searchTerm }) => {
     const item = items[index]
     if (!item) return null
 
@@ -245,18 +269,22 @@ function Home() {
     const customsRate = getCustomsRate(item.tax_values, countryId)
     const customsTooltip = getCustomsTooltip(item.tax_values)
 
+    // Highlight search term in name and code
+    const highlightedName = highlightText(displayName, searchTerm)
+    const highlightedCode = highlightText(displayCode, searchTerm)
+
     return (
       <div style={style} className="table-row">
         <div className="table-cell table-cell-code"
              onClick={() => onCopyCode(displayCode)}
              title={displayCode ? 'Click to copy' : ''}
              style={{ cursor: displayCode ? 'pointer' : 'default' }}>
-          {displayCode || '\u00A0'}
+          {highlightedCode || '\u00A0'}
         </div>
         <div className="table-cell table-cell-name"
              style={{ paddingLeft: `${item.level * 24}px` }}
              title={displayName}>
-          {displayName}
+          {highlightedName}
         </div>
         <div className="table-cell table-cell-tax">
           {item.vat || '-'}
@@ -366,7 +394,12 @@ function Home() {
               rowComponent={Row}
               rowCount={filteredData.length}
               rowHeight={32}
-              rowProps={{ items: filteredData, onCopyCode: copyToClipboard, countryId: selectedCountry }}
+              rowProps={{
+                items: filteredData,
+                onCopyCode: copyToClipboard,
+                countryId: selectedCountry,
+                searchTerm: debouncedFilter.replace(/^"|"$/g, '').replace(/\*$/g, '').trim()
+              }}
             />
           ) : (
             <div className="no-items">No items found</div>

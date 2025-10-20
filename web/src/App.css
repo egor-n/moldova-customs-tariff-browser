@@ -714,6 +714,16 @@
   color: #2d3748;
 }
 
+/* Search Highlight */
+.highlight {
+  background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+  color: #92400e;
+  padding: 0.125rem 0.25rem;
+  border-radius: 3px;
+  font-weight: 600;
+  box-shadow: 0 0 0 2px rgba(251, 191, 36, 0.2);
+}
+
 /* Loading & Error */
 .loading, .error {
   text-align: center;
