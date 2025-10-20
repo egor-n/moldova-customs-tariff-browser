@@ -339,14 +339,16 @@ function Home() {
              title={displayName}>
           {highlightedName}
         </div>
-        <div className="table-cell table-cell-tax">
+        <div className="table-cell table-cell-tax"
+             title={item.vat ? `VAT rate: ${item.vat}` : 'No VAT rate specified'}>
           {item.vat || '-'}
         </div>
         <div className="table-cell table-cell-tax table-cell-tax-customs"
              title={customsTooltip}>
           {customsRate}
         </div>
-        <div className="table-cell table-cell-tax">
+        <div className="table-cell table-cell-tax"
+             title={item.excise ? `Excise tax: ${item.excise}` : 'No excise tax applicable'}>
           {item.excise || '-'}
         </div>
       </div>
