@@ -70,12 +70,12 @@
 /* Footer */
 .footer {
   background: #ffffff;
-  padding: 0.625rem 0;
+  padding: 0.25rem 0;
   text-align: center;
   color: #64748b;
   border-top: 1px solid #e2e8f0;
-  font-size: 0.75rem;
-  line-height: 1.5;
+  font-size: 0.7rem;
+  line-height: 1;
   letter-spacing: 0.01em;
 }
 
