@@ -17,28 +17,71 @@ function Home() {
       .replace(/[\u0300-\u036f]/g, '')
   }
 
-  // Helper to highlight search term in text
+  // Helper to highlight search terms in text (supports multiple words)
   const highlightText = (text, searchTerm) => {
     if (!searchTerm || !text) return text
 
+    // Split search term into individual words
+    const searchWords = searchTerm.trim().split(/\s+/).filter(w => w.length > 0)
+    if (searchWords.length === 0) return text
+
     const normalizedText = normalizeText(text)
-    const normalizedSearch = normalizeText(searchTerm)
+    const matches = []
 
-    const index = normalizedText.indexOf(normalizedSearch)
-    if (index === -1) return text
+    // Find all matches for each search word
+    searchWords.forEach(word => {
+      const normalizedWord = normalizeText(word)
+      let startIndex = 0
 
-    // Find the actual substring in original text that matches
-    const before = text.substring(0, index)
-    const match = text.substring(index, index + normalizedSearch.length)
-    const after = text.substring(index + normalizedSearch.length)
+      while (true) {
+        const index = normalizedText.indexOf(normalizedWord, startIndex)
+        if (index === -1) break
 
-    return (
-      <>
-        {before}
-        <mark className="highlight">{match}</mark>
-        {after}
-      </>
-    )
+        matches.push({
+          start: index,
+          end: index + normalizedWord.length
+        })
+        startIndex = index + 1
+      }
+    })
+
+    if (matches.length === 0) return text
+
+    // Sort matches by start position and merge overlapping ranges
+    matches.sort((a, b) => a.start - b.start)
+    const merged = []
+    matches.forEach(match => {
+      if (merged.length === 0 || merged[merged.length - 1].end < match.start) {
+        merged.push(match)
+      } else {
+        merged[merged.length - 1].end = Math.max(merged[merged.length - 1].end, match.end)
+      }
+    })
+
+    // Build the highlighted result
+    const parts = []
+    let lastEnd = 0
+
+    merged.forEach((match, i) => {
+      // Add text before the match
+      if (match.start > lastEnd) {
+        parts.push(text.substring(lastEnd, match.start))
+      }
+      // Add highlighted match
+      parts.push(
+        <mark key={i} className="highlight">
+          {text.substring(match.start, match.end)}
+        </mark>
+      )
+      lastEnd = match.end
+    })
+
+    // Add remaining text
+    if (lastEnd < text.length) {
+      parts.push(text.substring(lastEnd))
+    }
+
+    return <>{parts}</>
   }
 
   const copyToClipboard = async (code) => {
@@ -233,16 +276,19 @@ function Home() {
       return includeParentsAndChildren(matchedItems)
     }
 
-    // Normalized text search for text queries
-    const searchNormalized = normalizeText(searchValue)
+    // Normalized text search for text queries - split by words
+    const searchWords = searchValue.trim().split(/\s+/).map(word => normalizeText(word))
     matchedItems = flatData.filter(item => {
       const nameRo = normalizeText(item.name_ro)
       const nameRu = normalizeText(item.name_ru)
       const nameEn = normalizeText(item.name_en)
 
-      return nameRo.includes(searchNormalized) ||
-             nameRu.includes(searchNormalized) ||
-             nameEn.includes(searchNormalized)
+      // Check if ALL search words are present in at least one of the name fields
+      return searchWords.every(word =>
+        nameRo.includes(word) ||
+        nameRu.includes(word) ||
+        nameEn.includes(word)
+      )
     })
     return includeParentsAndChildren(matchedItems)
   }, [flatData, debouncedFilter, includeParentsAndChildren])
