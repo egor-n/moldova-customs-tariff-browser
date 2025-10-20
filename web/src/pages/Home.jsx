@@ -30,6 +30,42 @@ function Home() {
     }
   }
 
+  const generateMarkdown = (data) => {
+    let markdown = '# Moldova Customs Tariff Nomenclature\n\n'
+    markdown += `Generated: ${new Date().toISOString().split('T')[0]}\n`
+    markdown += `Total Items: ${data.length.toLocaleString()}\n`
+    markdown += `Source: https://trade.gov.md\n\n---\n\n`
+
+    data.forEach(item => {
+      const indent = '  '.repeat(item.level)
+      const displayName = item.name_ro || item.name_ru || item.name_en || 'Unnamed'
+
+      if (item.nc) {
+        markdown += `${indent}- **${item.nc}** - ${displayName}\n`
+      } else {
+        markdown += `${indent}- ${displayName}\n`
+      }
+    })
+
+    return markdown
+  }
+
+  const handleDownload = () => {
+    const markdown = generateMarkdown(flatData)
+    const blob = new Blob([markdown], { type: 'text/markdown;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = `moldova-tariff-nomenclature-${new Date().toISOString().split('T')[0]}.md`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    URL.revokeObjectURL(url)
+
+    setToast({ show: true, message: 'Download started!' })
+    setTimeout(() => setToast({ show: false, message: '' }), 2000)
+  }
+
   // Debounce filter input
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -164,7 +200,7 @@ function Home() {
 
     // Wildcard search - exact prefix match on NC codes
     if (isWildcard) {
-      const searchNormalized = normalizeText(searchValue)
+      const searchNormalized = normalizeText(searchValue).replace(/\s/g, '')
       matchedItems = flatData.filter(item => {
         const displayCode = normalizeText(item.nc)
         return displayCode.startsWith(searchNormalized)
@@ -172,12 +208,13 @@ function Home() {
       return includeParents(matchedItems)
     }
 
-    // Check if search is numeric (NC code search)
-    const isNumericSearch = /^[0-9]+$/.test(searchValue)
+    // Check if search is numeric (NC code search) - allow spaces in between
+    const searchValueNoSpaces = searchValue.replace(/\s/g, '')
+    const isNumericSearch = /^[0-9]+$/.test(searchValueNoSpaces)
 
     if (isNumericSearch) {
-      // Exact match for NC codes (no fuzzy)
-      matchedItems = flatData.filter(item => item.nc.includes(searchValue))
+      // Exact match for NC codes (no fuzzy) - remove spaces from input
+      matchedItems = flatData.filter(item => item.nc.includes(searchValueNoSpaces))
       return includeParents(matchedItems)
     }
 
@@ -258,6 +295,31 @@ function Home() {
           {toast.message}
         </div>
       )}
+
+      <div className="download-section">
+        <div className="download-info">
+          <h3>Download for LLM Analysis</h3>
+          <p>Export all {flatData.length.toLocaleString()} items as a structured markdown file (~{(flatData.length * 75 / 1024 / 1024).toFixed(1)} MB). Contains NC codes and category names in hierarchical format, optimized for AI analysis.</p>
+          <div className="download-sample">
+            <span className="download-sample-icon">i</span>
+            <span>View sample format</span>
+            <div className="download-sample-tooltip">
+              {`- **0101** - Cai, măgari, catâri şi bardoi, vii:
+  - **010121000** - – – Cai
+  - **010129000** - – – Altele
+- **0102** - Animale vii din specia bovine
+  - **01022100** - – – Din rase pentru reproducţie
+    - **010221001** - – – – Vaci
+
+...`}
+            </div>
+          </div>
+        </div>
+        <button className="download-button" onClick={handleDownload}>
+          <span className="download-icon">↓</span>
+          Download Markdown
+        </button>
+      </div>
 
       <div className="tree-header">
         <input
