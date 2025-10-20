@@ -746,6 +746,66 @@
     font-size: 1.2rem;
   }
 
+  .tree-container {
+    padding: 0 1rem;
+  }
+
+  .download-section {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+    gap: 1rem;
+  }
+
+  .download-info h3 {
+    font-size: 0.9375rem;
+  }
+
+  .download-info p {
+    font-size: 0.8125rem;
+  }
+
+  .download-sample {
+    font-size: 0.75rem;
+  }
+
+  .download-sample-tooltip {
+    min-width: 300px;
+    max-width: calc(100vw - 2rem);
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .download-sample-tooltip::after {
+    left: 50%;
+    transform: translateX(-50%);
+  }
+
+  .download-button {
+    width: 100%;
+    justify-content: center;
+    padding: 1rem 1.5rem;
+  }
+
+  .tree-header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .country-filter {
+    min-width: auto;
+    flex: 1;
+  }
+
+  .tree-count {
+    width: 100%;
+    text-align: center;
+  }
+
+  .table-cell-name {
+    min-width: 150px;
+  }
+
   .children-list {
     grid-template-columns: 1fr;
   }

@@ -298,11 +298,11 @@ function Home() {
 
       <div className="download-section">
         <div className="download-info">
-          <h3>Download for LLM Analysis</h3>
-          <p>Export all {flatData.length.toLocaleString()} items as a structured markdown file (~{(flatData.length * 75 / 1024 / 1024).toFixed(1)} MB). Contains NC codes and category names in hierarchical format, optimized for AI analysis.</p>
+          <h3>LLM-Ready Export</h3>
+          <p>Export all {flatData.length.toLocaleString()} items as markdown (~{(flatData.length * 75 / 1024 / 1024).toFixed(1)} MB).</p>
           <div className="download-sample">
             <span className="download-sample-icon">i</span>
-            <span>View sample format</span>
+            <span>View sample</span>
             <div className="download-sample-tooltip">
               {`- **0101** - Cai, măgari, catâri şi bardoi, vii:
   - **010121000** - – – Cai
@@ -317,7 +317,7 @@ function Home() {
         </div>
         <button className="download-button" onClick={handleDownload}>
           <span className="download-icon">↓</span>
-          Download Markdown
+          Download
         </button>
       </div>
 
