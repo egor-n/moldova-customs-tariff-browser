@@ -150,13 +150,13 @@ function Home() {
   }, [])
 
 
-  // Helper to include parent items for context
-  const includeParents = useCallback((matchedItems) => {
+  // Helper to include parent and child items for context
+  const includeParentsAndChildren = useCallback((matchedItems) => {
     if (!matchedItems || !matchedItems.length) return []
 
     const itemsToShow = new Set()
 
-    // For each matched item, include it and all its parents
+    // For each matched item, include it, all its parents, and all its children
     matchedItems.forEach(item => {
       if (!item) return
 
@@ -168,9 +168,16 @@ function Home() {
           itemsToShow.add(parentId)
         })
       }
+
+      // Add all children (items whose parentIds contain this item's ID)
+      flatData.forEach(potentialChild => {
+        if (potentialChild.parentIds && potentialChild.parentIds.includes(item.id)) {
+          itemsToShow.add(potentialChild.id)
+        }
+      })
     })
 
-    // Get all items (matched + parents) and sort by original tree order
+    // Get all items (matched + parents + children) and sort by original tree order
     return flatData
       .filter(item => itemsToShow.has(item.id))
       .sort((a, b) => a.indexInTree - b.indexInTree)
@@ -200,7 +207,7 @@ function Home() {
                nameEn.includes(exactNormalized) ||
                nc.includes(exactNormalized)
       })
-      return includeParents(matchedItems)
+      return includeParentsAndChildren(matchedItems)
     }
 
     const isWildcard = searchTrimmed.endsWith('*')
@@ -213,7 +220,7 @@ function Home() {
         const displayCode = normalizeText(item.nc)
         return displayCode.startsWith(searchNormalized)
       })
-      return includeParents(matchedItems)
+      return includeParentsAndChildren(matchedItems)
     }
 
     // Check if search is numeric (NC code search) - allow spaces in between
@@ -223,7 +230,7 @@ function Home() {
     if (isNumericSearch) {
       // Exact match for NC codes (no fuzzy) - remove spaces from input
       matchedItems = flatData.filter(item => item.nc.includes(searchValueNoSpaces))
-      return includeParents(matchedItems)
+      return includeParentsAndChildren(matchedItems)
     }
 
     // Normalized text search for text queries
@@ -237,8 +244,8 @@ function Home() {
              nameRu.includes(searchNormalized) ||
              nameEn.includes(searchNormalized)
     })
-    return includeParents(matchedItems)
-  }, [flatData, debouncedFilter, includeParents])
+    return includeParentsAndChildren(matchedItems)
+  }, [flatData, debouncedFilter, includeParentsAndChildren])
 
   // Helper to get customs rate for selected country
   const getCustomsRate = (taxValues, countryId) => {
