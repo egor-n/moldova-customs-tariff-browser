@@ -222,6 +222,33 @@
   flex-direction: column;
 }
 
+/* Custom scrollbar for the virtualized list */
+.tree-view ::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+.tree-view ::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+.tree-view ::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+  transition: background 0.2s ease;
+}
+
+.tree-view ::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Firefox scrollbar */
+.tree-view * {
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 #f1f5f9;
+}
+
 .tree-row {
   font-size: 0.95rem;
 }
