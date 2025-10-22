@@ -266,13 +266,13 @@ function Home() {
       return includeParentsAndChildren(matchedItems)
     }
 
-    // Check if search is numeric (NC code search) - allow spaces in between
-    const searchValueNoSpaces = searchValue.replace(/\s/g, '')
-    const isNumericSearch = /^[0-9]+$/.test(searchValueNoSpaces)
+    // Check if search is numeric (NC code search) - allow spaces and dots in between
+    const searchValueNormalized = searchValue.replace(/[\s.]/g, '')
+    const isNumericSearch = /^[0-9]+$/.test(searchValueNormalized)
 
     if (isNumericSearch) {
-      // Exact match for NC codes (no fuzzy) - remove spaces from input
-      matchedItems = flatData.filter(item => item.nc.includes(searchValueNoSpaces))
+      // Exact match for NC codes (no fuzzy) - remove spaces and dots from input
+      matchedItems = flatData.filter(item => item.nc.includes(searchValueNormalized))
       return includeParentsAndChildren(matchedItems)
     }
 
