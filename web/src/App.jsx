@@ -23,8 +23,11 @@ function App() {
         </main>
 
         <footer className="footer">
-          <div className="container">
-            <p>Data sourced from trade.gov.md</p>
+          <div className="footer-content">
+            <a href="https://ecustoms.trade.gov.md/declaration-post" target="_blank" rel="noopener noreferrer">
+              Declare postal packages
+            </a>
+            <span>Data sourced from trade.gov.md</span>
           </div>
         </footer>
       </div>

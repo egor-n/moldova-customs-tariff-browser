@@ -70,13 +70,32 @@
 /* Footer */
 .footer {
   background: #ffffff;
-  padding: 0.25rem 0;
-  text-align: center;
+  padding: 0.6rem 0;
   color: #64748b;
   border-top: 1px solid #e2e8f0;
   font-size: 0.7rem;
   line-height: 1;
   letter-spacing: 0.01em;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.footer-content a {
+  color: #3b82f6;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.footer-content a:hover {
+  color: #2563eb;
+  text-decoration: underline;
 }
 
 
