@@ -2,13 +2,13 @@
 
 A complete solution for accessing, processing, and browsing Moldova's customs tariff nomenclature data from trade.gov.md.
 
+**🌐 [Live App](https://vama-md.netlify.app/)** - Browse 15,067 tariff items with instant search and multilingual support
+
 ## Overview
 
 This monorepo contains:
 1. **Scraper** - Python tools to fetch and process 15,067 tariff items from Moldova's API
 2. **Web App** - React SPA for browsing the nomenclature with advanced search
-
-**Live Demo**: Browse the hierarchical tariff structure with instant search, wildcard filtering, and clipboard integration.
 
 ## Quick Start
 
