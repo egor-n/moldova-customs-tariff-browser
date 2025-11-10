@@ -10,6 +10,80 @@ This monorepo contains:
 1. **Scraper** - Python tools to fetch and process 15,067 tariff items from Moldova's API
 2. **Web App** - React SPA for browsing the nomenclature with advanced search
 
+## Architecture
+
+```mermaid
+graph TB
+    subgraph External
+        API[Moldova Trade API<br/>trade.gov.md/api/tarim-nomenclature]
+    end
+
+    subgraph "Data Collection Layer"
+        Scraper[scraper.py<br/>Sequential Scraper]
+        Raw[raw_responses/<br/>page_1.json ... page_302.json<br/>15,067 items]
+    end
+
+    subgraph "Data Processing Layer"
+        Processor[processor.py<br/>Tree Builder]
+        Flat[data/nomenclature_flat.json<br/>14.7MB - Flat array with paths]
+        Tree[data/nomenclature_tree.json<br/>9.5MB - Nested hierarchy]
+    end
+
+    subgraph "Presentation Layer (React SPA)"
+        WebApp[web/src/pages/Home.jsx<br/>Main Component]
+        Display[Display Features]
+        Search[Search Engine]
+
+        WebApp --> Display
+        WebApp --> Search
+
+        Display --> |Visual Indentation|Render[Hierarchical Rendering<br/>15,067 items]
+        Display --> |Click to Copy|Clipboard[Clipboard Integration]
+
+        Search --> |Debounced 150ms|Filter[Filter Logic]
+        Filter --> |Diacritics-insensitive|Normalize[normalizeText&#40;&#41;]
+        Filter --> |Wildcard *|Prefix[Prefix Matching]
+    end
+
+    subgraph "Deployment"
+        Build[npm run build]
+        Dist[dist/<br/>Production Build]
+        Netlify[Netlify CDN<br/>vama-md.netlify.app]
+    end
+
+    API -->|302 pages × 50 items<br/>Rate-limited: 2-3s delays| Scraper
+    Scraper -->|Save individually<br/>Resume-safe| Raw
+    Raw -->|Read all files<br/>Build lookups| Processor
+    Processor -->|Transform & Sort| Flat
+    Processor -->|Build hierarchy<br/>Sort by &#40;nc=='', nc&#41;| Tree
+    Tree -->|Fetch on load<br/>9.5MB JSON| WebApp
+    WebApp -->|Flatten with levels<br/>Depth-first traversal| Display
+
+    WebApp --> Build
+    Build --> Dist
+    Dist --> Netlify
+
+    style API fill:#e1f5ff
+    style Scraper fill:#fff4e1
+    style Processor fill:#fff4e1
+    style WebApp fill:#e8f5e9
+    style Netlify fill:#f3e5f5
+    style Tree fill:#ffebee
+```
+
+**Data Flow Summary:**
+1. **Scraper** fetches paginated API responses (302 pages, ~12-15 min)
+2. **Processor** transforms flat data into hierarchical tree structure
+3. **Web App** loads tree JSON, flattens it, and provides instant search
+4. **Deployment** builds static site and deploys to Netlify CDN
+
+**Key Design Decisions:**
+- **Resume-safe scraping**: Individual page files allow safe interruption
+- **Dual formats**: Flat JSON for analysis, tree JSON for display
+- **Client-side flattening**: Tree flattened on load for O(1) search
+- **No virtualization**: Modern browsers efficiently handle 15k items
+- **Proper ordering**: NC codes sorted first at each hierarchy level
+
 ## Quick Start
 
 ### Web App (Recommended)
