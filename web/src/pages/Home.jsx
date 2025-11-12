@@ -132,6 +132,16 @@ function Home() {
     setTimeout(() => setToast({ show: false, message: '' }), 2000)
   }
 
+  const handleOpenInChatGPT = () => {
+    const prompt = `I have Moldova's customs tariff nomenclature data with ${flatData.length.toLocaleString()} items (NC codes). Help me find the correct tariff category for my product. Ask me to describe the product, then suggest the most appropriate NC code with explanation.`
+    const encodedPrompt = encodeURIComponent(prompt)
+    const chatGPTUrl = `https://chatgpt.com/?q=${encodedPrompt}`
+    window.open(chatGPTUrl, '_blank', 'noopener,noreferrer')
+
+    setToast({ show: true, message: 'Opening ChatGPT...' })
+    setTimeout(() => setToast({ show: false, message: '' }), 2000)
+  }
+
   // Debounce filter input
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -425,6 +435,10 @@ function Home() {
               </div>
             </div>
           </div>
+          <button className="chatgpt-button" onClick={handleOpenInChatGPT} title="Open ChatGPT with helper prompt">
+            <span className="chatgpt-icon">💬</span>
+            <span>Open in ChatGPT</span>
+          </button>
         </div>
       </div>
 
