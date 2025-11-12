@@ -435,10 +435,23 @@ function Home() {
               </div>
             </div>
           </div>
-          <button className="chatgpt-button" onClick={handleOpenInChatGPT} title="Open ChatGPT with helper prompt">
-            <span className="chatgpt-icon">💬</span>
-            <span>Open in ChatGPT</span>
-          </button>
+          <div className="chatgpt-button-wrapper">
+            <button className="chatgpt-button" onClick={handleOpenInChatGPT} title="Open ChatGPT with helper prompt">
+              <span className="chatgpt-icon">💬</span>
+              <span>Open in ChatGPT</span>
+            </button>
+            <div className="chatgpt-tooltip">
+              <div className="chatgpt-tooltip-header">
+                <strong>AI-Assisted Classification</strong>
+              </div>
+              <div className="chatgpt-tooltip-body">
+                <p><strong>Step 1:</strong> Download the LLM file using the button to the left</p>
+                <p><strong>Step 2:</strong> Click this button to open ChatGPT with a helper prompt</p>
+                <p><strong>Step 3:</strong> Attach the downloaded file to your ChatGPT conversation manually</p>
+                <p className="chatgpt-tooltip-note">ChatGPT can then help you find the right tariff code by analyzing the full nomenclature.</p>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
