@@ -457,7 +457,7 @@
 .chatgpt-tooltip {
   position: absolute;
   top: calc(100% + 8px);
-  left: 0;
+  right: 0;
   background: #1e293b;
   color: #ffffff;
   border-radius: 10px;
@@ -479,7 +479,7 @@
   content: '';
   position: absolute;
   bottom: 100%;
-  left: 20px;
+  right: 20px;
   border: 6px solid transparent;
   border-bottom-color: #1e293b;
 }
