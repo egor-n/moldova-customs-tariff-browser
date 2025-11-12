@@ -133,7 +133,7 @@ function Home() {
   }
 
   const handleOpenInChatGPT = () => {
-    const prompt = `I have Moldova's customs tariff nomenclature data with ${flatData.length.toLocaleString()} items (NC codes). Help me find the correct tariff category for my product. Ask me to describe the product, then suggest the most appropriate NC code with explanation.`
+    const prompt = `Help me find the correct customs tariff code (NC/HS code) for my product. Ask me what I'm importing/exporting, then guide me to identify the most appropriate tariff classification with explanation of why it fits.`
     const encodedPrompt = encodeURIComponent(prompt)
     const chatGPTUrl = `https://chatgpt.com/?q=${encodedPrompt}`
     window.open(chatGPTUrl, '_blank', 'noopener,noreferrer')
