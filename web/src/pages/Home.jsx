@@ -132,6 +132,16 @@ function Home() {
     setTimeout(() => setToast({ show: false, message: '' }), 2000)
   }
 
+  const handleOpenInChatGPT = () => {
+    const prompt = `Help me find the correct customs tariff code (NC/HS code) for my product. Ask me what I'm importing/exporting, then guide me to identify the most appropriate tariff classification with explanation of why it fits.`
+    const encodedPrompt = encodeURIComponent(prompt)
+    const chatGPTUrl = `https://chatgpt.com/?q=${encodedPrompt}`
+    window.open(chatGPTUrl, '_blank', 'noopener,noreferrer')
+
+    setToast({ show: true, message: 'Opening ChatGPT...' })
+    setTimeout(() => setToast({ show: false, message: '' }), 2000)
+  }
+
   // Debounce filter input
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -422,6 +432,23 @@ function Home() {
   - **010129000** - Altele
 - **0102** - Animale vii din specia...`}</pre>
                 </div>
+              </div>
+            </div>
+          </div>
+          <div className="chatgpt-button-wrapper">
+            <button className="chatgpt-button" onClick={handleOpenInChatGPT} title="Open ChatGPT with helper prompt">
+              <span className="chatgpt-icon">💬</span>
+              <span>Open in ChatGPT</span>
+            </button>
+            <div className="chatgpt-tooltip">
+              <div className="chatgpt-tooltip-header">
+                <strong>AI-Assisted Classification</strong>
+              </div>
+              <div className="chatgpt-tooltip-body">
+                <p><strong>Step 1:</strong> Download the LLM file using the button to the left</p>
+                <p><strong>Step 2:</strong> Click this button to open ChatGPT with a helper prompt</p>
+                <p><strong>Step 3:</strong> Attach the downloaded file to your ChatGPT conversation manually</p>
+                <p className="chatgpt-tooltip-note">ChatGPT can then help you find the right tariff code by analyzing the full nomenclature.</p>
               </div>
             </div>
           </div>

@@ -418,6 +418,101 @@
   overflow-x: auto;
 }
 
+.chatgpt-button-wrapper {
+  position: relative;
+}
+
+.chatgpt-button {
+  display: flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.5rem 0.875rem;
+  background: linear-gradient(135deg, #9333ea 0%, #7c3aed 100%);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(147, 51, 234, 0.2);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.chatgpt-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px rgba(147, 51, 234, 0.3);
+  background: linear-gradient(135deg, #a855f7 0%, #9333ea 100%);
+}
+
+.chatgpt-button:active {
+  transform: translateY(0);
+}
+
+.chatgpt-icon {
+  font-size: 1rem;
+}
+
+.chatgpt-tooltip {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: #1e293b;
+  color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+  z-index: 1000;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+  min-width: 340px;
+  max-width: 420px;
+}
+
+.chatgpt-button-wrapper:hover .chatgpt-tooltip {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.chatgpt-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: 100%;
+  right: 20px;
+  border: 6px solid transparent;
+  border-bottom-color: #1e293b;
+}
+
+.chatgpt-tooltip-header {
+  padding: 0.875rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  font-size: 0.875rem;
+}
+
+.chatgpt-tooltip-body {
+  padding: 1rem;
+}
+
+.chatgpt-tooltip-body p {
+  margin: 0 0 0.625rem 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.chatgpt-tooltip-body p:last-child {
+  margin-bottom: 0;
+}
+
+.chatgpt-tooltip-note {
+  margin-top: 0.75rem !important;
+  padding-top: 0.75rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.7) !important;
+}
+
 .tree-node-content {
   display: flex;
   align-items: flex-start;
@@ -843,6 +938,26 @@
   .download-button-compact {
     width: 100%;
     justify-content: center;
+  }
+
+  .chatgpt-button-wrapper {
+    width: 100%;
+  }
+
+  .chatgpt-button {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .chatgpt-tooltip {
+    left: 50%;
+    transform: translateX(-50%);
+    max-width: calc(100vw - 2rem);
+  }
+
+  .chatgpt-tooltip::after {
+    left: 50%;
+    transform: translateX(-50%);
   }
 
   .download-tooltip {
